@@ -58,7 +58,7 @@ def generate_result(load_from_file, K):
         all_traj = []
         for i in range(K):
             use_freq, next_poi = get_next_poi(use_freq, lstm_rank)
-            new_traj = gibbs_sample.sampling_algo([poi_start, next_poi, poi_end], N_max=10, N_min=10)
+            new_traj = gibbs_sample.sampling_algo([poi_start, next_poi, poi_end], N_max=5, N_min=5)
             for j in range(len(new_traj)):
                 use_freq[new_traj[j]] += 1
             all_traj.append(new_traj)
