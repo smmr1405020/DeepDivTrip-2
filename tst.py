@@ -1,13 +1,6 @@
-import numpy as np
+import time
 
-a = np.array([[1,2,3],[4,5,6],[7,8,9]])
-
-
-b = np.array([[2,4,5],[3,2,6],[4,2,3]])
-
-
-print(a/b)
-
-b = np.tile(np.arange(1,3),(28,1))
-
-print(b.T)
+hr = 14
+min = 48
+t = (2021, 1, 1, hr, min, 0, 0, 1, 0)
+print(time.mktime(t))

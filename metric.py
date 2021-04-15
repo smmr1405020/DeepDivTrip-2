@@ -117,15 +117,6 @@ def pairsf1_evaluation(GT_set, GT_freq, recommended_set):
     return total_score
 
 
-def edt_evaluation(GT_set, GT_freq, recommended_set):
-    total_score = 0
-
-    for i in range(len(GT_set)):
-        total_score += calc_EDT(GT_set[i], recommended_set[0]) * GT_freq[i]
-
-    return total_score
-
-
 def total_f1_evaluation(route, recommended_set):
     total_score = 0
     for i in range(len(recommended_set)):
@@ -164,14 +155,6 @@ def tot_pf1_evaluation(GT_set, GT_freq, recommended_set):
     return total_score
 
 
-def tot_edt_evaluation(GT_set, GT_freq, recommended_set):
-    total_score = 0
-
-    for i in range(len(GT_set)):
-        for j in range(len(recommended_set)):
-            total_score += calc_EDT(GT_set[i], recommended_set[j]) * GT_freq[i]
-
-    return total_score
 
 
 def coverage_iou(GT_set, rec_set):
@@ -190,7 +173,7 @@ def coverage_iou(GT_set, rec_set):
     return ratio
 
 
-def intra_F1(set):
+def intra_div_F1(set):
     div_scores = []
     for i in range(len(set)):
         for j in range(i + 1, len(set)):
