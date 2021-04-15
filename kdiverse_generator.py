@@ -11,7 +11,7 @@ import args_kdiverse
 np.random.seed(1234567890)
 
 
-def generate_result(load_from_file, K):
+def generate_result(load_from_file, K, N_min, N_max):
     graph_embedding.get_POI_embeddings(load_from_file=load_from_file)
     lstm_model.get_forward_lstm_model(load_from_file=load_from_file)
     lstm_model.get_backward_lstm_model(load_from_file=load_from_file)
@@ -59,7 +59,7 @@ def generate_result(load_from_file, K):
         all_traj = []
         for i in range(K):
             use_freq, next_poi = get_next_poi(use_freq, lstm_rank)
-            new_traj = gibbs_sample.sampling_algo([poi_start, next_poi, poi_end], N_max=5, N_min=5)
+            new_traj = gibbs_sample.sampling_algo([poi_start, next_poi, poi_end], N_max=N_max, N_min=N_min)
             for j in range(len(new_traj)):
                 use_freq[new_traj[j]] += 1
             all_traj.append(new_traj)
@@ -106,15 +106,15 @@ def generate_result(load_from_file, K):
     print("Likability: " + str(avg_likability) + " F1: " + str(avg_f1) + " PF1: " + str(avg_pf1)
               + " Div: " + str(avg_div))
 
-    write_to_file(all_recset, 'recset_myalgo')
+    write_to_file(all_recset, 'recset_myalgo', N_min=N_min, N_max=N_max)
 
     return
 
 
-def write_to_file(dictionary, directory, isFreq=False):
+def write_to_file(dictionary, directory, N_min, N_max, isFreq=False):
     if not isFreq:
         file_path = os.path.join(directory, str(data_generator.embedding_name)) + "_" + str(
-            args_kdiverse.test_index) + '.csv'
+            args_kdiverse.test_index) + "_" + str(N_min) + "_" + str(N_max) + '.csv'
     else:
         file_path = os.path.join(directory, str(data_generator.embedding_name)) + "_" + str(
             args_kdiverse.test_index) + '_freq.csv'
