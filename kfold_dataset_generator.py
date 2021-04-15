@@ -278,7 +278,7 @@ def generate_ds(dat_ix, KFOLD, test_index):
                                                                 ALL_USER,
                                                                 ALL_TIME,
                                                                 poiIDs,
-                                                                copy_no=3, deviation_limit=0.5)
+                                                                copy_no=0, deviation_limit=0.5)
 
     query_set_dict_traj = {}
     query_set_dict_user = {}
