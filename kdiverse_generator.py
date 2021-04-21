@@ -113,8 +113,11 @@ def generate_result(load_from_file, K, N_min, N_max):
 
 def write_to_file(dictionary, directory, N_min, N_max, isFreq=False):
     if not isFreq:
-        file_path = os.path.join(directory, str(data_generator.embedding_name)) + "_" + str(
-            args_kdiverse.test_index) + "_" + str(N_min) + "_" + str(N_max) + '.csv'
+        file_path = os.path.join(directory, str(data_generator.embedding_name)) \
+                    + "_index_" + str(args_kdiverse.test_index) \
+                    + "_min_" + str(N_min) \
+                    + "_max_" + str(N_max) \
+                    + "_copy_" + str(args_kdiverse.copy_no) + '.csv'
     else:
         file_path = os.path.join(directory, str(data_generator.embedding_name)) + "_" + str(
             args_kdiverse.test_index) + '_freq.csv'
