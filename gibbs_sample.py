@@ -3,9 +3,7 @@ import lstm_model
 import torch
 import copy
 import random
-import data_generator
 import pprint
-import matplotlib.pyplot as plt
 
 np.random.seed(1234567890)
 torch.manual_seed(1234567890)
@@ -80,7 +78,7 @@ def get_traj_perplexity(input_seq):
         else:
             fwd_perplexity += -100
 
-    fwd_perplexity = (1 / len(input_seq) ** 0.75) * (-1.0) * fwd_perplexity
+    fwd_perplexity =  (-1.0) * fwd_perplexity
 
     bwd_perplexity = 0
     input_seq_b = list(reversed(list(input_seq)))
@@ -92,7 +90,7 @@ def get_traj_perplexity(input_seq):
         else:
             bwd_perplexity += -100
 
-    bwd_perplexity = (1 / len(input_seq) ** 0.75) * (-1.0) * bwd_perplexity
+    bwd_perplexity =  (-1.0) * bwd_perplexity
 
     perplexity = 0.5 * (fwd_perplexity + bwd_perplexity)
 

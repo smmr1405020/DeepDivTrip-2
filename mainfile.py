@@ -1,8 +1,8 @@
 import args_kdiverse
 
-args_kdiverse.dat_ix = 2
+args_kdiverse.dat_ix = 3
 args_kdiverse.FOLD = 5
-args_kdiverse.test_index = 1
+args_kdiverse.test_index = 3
 args_kdiverse.copy_no = 0
 
 N_min = 5

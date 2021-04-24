@@ -30,7 +30,6 @@ class TrajPredictor(nn.Module):
         self.linear_inp_size = self.hidden_size + self.embedding_dim
         self.fc1 = nn.Linear(self.linear_inp_size, 30)
         self.fc2 = nn.Linear(30, 1)
-        self.drop = nn.Dropout(0.2)
 
     def forward(self, seq, seq_lengths):
         embeds = self.embedding(seq)
@@ -156,7 +155,7 @@ def get_forward_lstm_model(load_from_file=True):
         trajpredictor_forward = TrajPredictor(pretrained_embeddings, parameters.lstm_model_hidden_size).to(device)
         optimizer_forward = optim.Adam(trajpredictor_forward.parameters(), lr=0.001)
         print("\nForward")
-        train(trajpredictor_forward, optimizer_forward, loss_fn, epochs=100)
+        train(trajpredictor_forward, optimizer_forward, loss_fn, epochs=60)
         print("\n")
     forward_lstm_model = TrajPredictor(pretrained_embeddings, parameters.lstm_model_hidden_size).to(device)
     fwd_model_state_dict = torch.load("model_files/LSTM_net_1_f_" + data_generator.embedding_name)
