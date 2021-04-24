@@ -1,3 +1,5 @@
+import os
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -138,10 +140,10 @@ def train(model, optimizer, loss_fn_, epochs=100, backward_model=False):
             validation_loss_min = validation_loss
             if not backward_model:
                 torch.save(model.state_dict(),
-                           "model_files/LSTM_net_1_f_" + data_generator.embedding_name)
+                           os.path.join("model_files", "LSTM_net_1_f_" + data_generator.embedding_name))
             else:
                 torch.save(model.state_dict(),
-                           "model_files/LSTM_net_1_b_" + data_generator.embedding_name)
+                           os.path.join("model_files", "LSTM_net_1_b_" + data_generator.embedding_name))
 
         if epoch % 1 == 0 or epoch == epochs - 1:
             print('Epoch: {}, Training Loss: {:.3f}, Validation Loss: {:.3f}'.format
@@ -158,13 +160,13 @@ def get_forward_lstm_model(load_from_file=True):
         train(trajpredictor_forward, optimizer_forward, loss_fn, epochs=60)
         print("\n")
     forward_lstm_model = TrajPredictor(pretrained_embeddings, parameters.lstm_model_hidden_size).to(device)
-    fwd_model_state_dict = torch.load("model_files/LSTM_net_1_f_" + data_generator.embedding_name)
+    fwd_model_state_dict = torch.load(os.path.join("model_files", "LSTM_net_1_f_" + data_generator.embedding_name))
     forward_lstm_model.load_state_dict(fwd_model_state_dict)
     # print_all(forward_lstm_model, backward_model=False)
     return forward_lstm_model
 
 
-#get_forward_lstm_model(False)
+# get_forward_lstm_model(False)
 
 
 def get_backward_lstm_model(load_from_file=True):
@@ -177,9 +179,9 @@ def get_backward_lstm_model(load_from_file=True):
         train(trajpredictor_backward, optimizer_backward, loss_fn, epochs=60, backward_model=True)
         print("\n")
     backward_lstm_model = TrajPredictor(pretrained_embeddings, parameters.lstm_model_hidden_size).to(device)
-    bwd_model_state_dict = torch.load("model_files/LSTM_net_1_b_" + data_generator.embedding_name)
+    bwd_model_state_dict = torch.load(os.path.join("model_files","LSTM_net_1_b_" + data_generator.embedding_name))
     backward_lstm_model.load_state_dict(bwd_model_state_dict)
     # print_all(backward_lstm_model, backward_model=True)
     return backward_lstm_model
 
-#get_backward_lstm_model(False)
+# get_backward_lstm_model(False)
