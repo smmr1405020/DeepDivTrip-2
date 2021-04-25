@@ -78,7 +78,7 @@ def get_traj_perplexity(input_seq):
         else:
             fwd_perplexity += -100
 
-    fwd_perplexity = (1 / len(input_seq) ** 0.3) * (-1.0) * fwd_perplexity
+    fwd_perplexity = (1 / len(input_seq) ** 0.15) * (-1.0) * fwd_perplexity
 
     bwd_perplexity = 0
     input_seq_b = list(reversed(list(input_seq)))

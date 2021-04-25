@@ -34,7 +34,7 @@ generate_ds(args_kdiverse.dat_ix, args_kdiverse.FOLD, args_kdiverse.test_index, 
 
 from kdiverse_generator import generate_result
 
-Ns = [(3, 13)]
+Ns = [(5, 5)]
 
 for Nmn, Nmx in Ns:
     generate_result(True, K=3, N_min=Nmn, N_max=Nmx)
