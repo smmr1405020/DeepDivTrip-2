@@ -1,12 +1,32 @@
 import args_kdiverse
+import os
+import glob
+import zipfile
+
+if os.path.exists('model_files'):
+    files = glob.glob('model_files/*')
+    for f in files:
+        os.remove(f)
+
+    os.rmdir('model_files')
+
+if os.path.exists('recset_myalgo'):
+    files = glob.glob('recset_myalgo/*')
+    for f in files:
+        os.remove(f)
+else:
+    os.mkdir('recset_myalgo')
 
 args_kdiverse.dat_ix = 3
 args_kdiverse.FOLD = 5
-args_kdiverse.test_index = 3
+args_kdiverse.test_index = 1
 args_kdiverse.copy_no = 0
 
-N_min = 5
-N_max = 5
+model_zip_name = 'model_files_ds_' + str(args_kdiverse.dat_ix) + '_index_' \
+                 + str(args_kdiverse.test_index) + '_copy_' + str(args_kdiverse.copy_no)+'.zip'
+
+with zipfile.ZipFile(os.path.join('model_repository', model_zip_name), 'r') as zip_ref:
+    zip_ref.extractall('.')
 
 from kfold_dataset_generator import generate_ds
 
@@ -14,4 +34,7 @@ generate_ds(args_kdiverse.dat_ix, args_kdiverse.FOLD, args_kdiverse.test_index, 
 
 from kdiverse_generator import generate_result
 
-generate_result(False, K=3, N_min=N_min, N_max=N_max)
+Ns = [(3, 3), (5, 5), (7, 7), (9, 9)]
+
+for Nmn, Nmx in Ns:
+    generate_result(True, K=3, N_min=Nmn, N_max=Nmx)
