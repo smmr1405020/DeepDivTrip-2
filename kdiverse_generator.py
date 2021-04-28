@@ -5,7 +5,7 @@ import numpy as np
 import data_generator
 import graph_embedding
 import lstm_model
-import gibbs_sample
+import trajectory_generator
 import args_kdiverse
 
 np.random.seed(1234567890)
@@ -28,14 +28,18 @@ def generate_result(load_from_file, K, N_min, N_max):
     all_gtfreqset = dict()
     all_recset = dict()
 
-    # st = time.time()
+    print(data_generator.vocab_to_int)
     for k, v in data_generator.query_dict_trajectory_test.items():
 
         str_k = str(k).split("-")
         poi_start = int(str_k[0])
         poi_end = int(str_k[1])
 
-        _, lstm_order = gibbs_sample.get_prob_in_idx([poi_start, 0, poi_end], 1)
+        print("{}/{}".format(count, len(data_generator.query_dict_trajectory_test)))
+        count += 1
+        print([data_generator.int_to_vocab[poi_start], data_generator.int_to_vocab[poi_end]])
+
+        _, lstm_order = trajectory_generator.get_prob_in_idx([poi_start, 0, poi_end], 1)
         lstm_rank = np.argsort(lstm_order)
 
         def get_next_poi(use_freq_, rank):
@@ -58,15 +62,11 @@ def generate_result(load_from_file, K, N_min, N_max):
         use_freq = np.zeros([len(lstm_rank)])
         all_traj = []
         for i in range(K):
-            use_freq, next_poi = get_next_poi(use_freq, lstm_rank)
-            new_traj = gibbs_sample.sampling_algo([poi_start, next_poi, poi_end], N_max=N_max, N_min=N_min)
-            for j in range(len(new_traj)):
-                use_freq[new_traj[j]] += 1
+            next_poi = get_next_poi(use_freq, lstm_rank)[1]
+            new_traj = trajectory_generator.get_sequence(poi_start, next_poi, poi_end, min_seq_length=N_min, max_seq_length=N_max)
+            for i in range(len(new_traj)):
+                use_freq[new_traj[i]] += 1
             all_traj.append(new_traj)
-
-        print("{}/{}".format(count, len(data_generator.query_dict_trajectory_test)))
-        count += 1
-        print([data_generator.int_to_vocab[poi_start], data_generator.int_to_vocab[poi_end]])
 
         k_converted = str(data_generator.int_to_vocab[poi_start]) + '-' + str(data_generator.int_to_vocab[poi_end])
 
@@ -80,6 +80,9 @@ def generate_result(load_from_file, K, N_min, N_max):
         dict_temp[k] = all_traj
         all_recset[k_converted] = list(data_generator.convert_int_to_vocab(dict_temp).values())[0]
         # print(metric.tot_f1_evaluation(v, data_generator.query_dict_freq_test[k], all_traj))
+
+        print(all_gtset[k_converted])
+        print(all_recset[k_converted])
 
         total_score_likability += metric.likability_score_3(v, data_generator.query_dict_freq_test[k], all_traj)
         total_score_curr_f1 += metric.tot_f1_evaluation(v, data_generator.query_dict_freq_test[k], all_traj)
@@ -96,7 +99,7 @@ def generate_result(load_from_file, K, N_min, N_max):
         print("Avg. upto now: Likability: " + str(avg_likability) + " F1: " + str(avg_f1) + " PF1: " + str(avg_pf1)
               + " Div: " + str(avg_div))
 
-    print("\n")
+    print("\n\n")
     print("Final Score - With K = {}".format(K))
     avg_likability = total_score_likability / (count - 1)
     avg_div = total_score_intra_div_f1 / (count - 1)
@@ -104,9 +107,9 @@ def generate_result(load_from_file, K, N_min, N_max):
     avg_pf1 = total_score_curr_pf1 / total_traj_curr
 
     print("Likability: " + str(avg_likability) + " F1: " + str(avg_f1) + " PF1: " + str(avg_pf1)
-              + " Div: " + str(avg_div))
+          + " Div: " + str(avg_div))
 
-    write_to_file(all_recset, 'recset_myalgo', N_min=N_min, N_max=N_max)
+    write_to_file(all_recset, 'recset_ddtwos', N_min=N_min, N_max=N_max)
 
     return
 
