@@ -17,9 +17,9 @@ if os.path.exists('recset_ddtwos'):
 else:
     os.mkdir('recset_ddtwos')
 
-args_kdiverse.dat_ix = 2
+args_kdiverse.dat_ix = 3
 args_kdiverse.FOLD = 5
-args_kdiverse.test_index = 2
+args_kdiverse.test_index = 3
 args_kdiverse.copy_no = 0
 
 model_zip_name = 'model_files_ds_' + str(args_kdiverse.dat_ix) + '_index_' \
@@ -34,7 +34,7 @@ generate_ds(args_kdiverse.dat_ix, args_kdiverse.FOLD, args_kdiverse.test_index, 
 
 from kdiverse_generator import generate_result
 
-Ns = [(3, 3), (5, 5), (7, 7), (9, 9), (3, 13)]
+Ns = [(5, 5)]
 
 for Nmn, Nmx in Ns:
     generate_result(True, K=3, N_min=Nmn, N_max=Nmx)
