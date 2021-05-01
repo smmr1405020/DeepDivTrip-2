@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import lstm_model
 import torch
@@ -46,55 +48,95 @@ def get_model_probs(input_seq):
     return output_prb_f, output_prb_b
 
 
+def get_model_probs_f(input_seq):
+    for i in range(len(input_seq)):
+        if input_seq[i] is None:
+            input_seq[i] = 0
+
+    input_seq_f = list(input_seq)
+
+    input_seq_length = [len(input_seq)]
+    input_seq_length = torch.LongTensor(input_seq_length).to(device)
+
+    input_seq_batch_f = [input_seq_f]
+    input_seq_batch_f = np.array(input_seq_batch_f)
+    input_seq_batch_f = np.transpose(input_seq_batch_f)
+    input_seq_batch_f = torch.LongTensor(input_seq_batch_f).to(device)
+
+    model_fwd = lstm_model.get_forward_lstm_model(load_from_file=True)
+    output_prb_f = torch.softmax(model_fwd(input_seq_batch_f, input_seq_length), dim=-1)
+    output_prb_f = output_prb_f.cpu().detach().numpy()
+
+    return output_prb_f
+
+
+def get_model_probs_b(input_seq):
+
+    for i in range(len(input_seq)):
+        if input_seq[i] is None:
+            input_seq[i] = 0
+
+    input_seq_b = list(reversed(list(input_seq)))
+
+    input_seq_length = [len(input_seq)]
+    input_seq_length = torch.LongTensor(input_seq_length).to(device)
+
+    input_seq_batch_b = [input_seq_b]
+    input_seq_batch_b = np.array(input_seq_batch_b)
+    input_seq_batch_b = np.transpose(input_seq_batch_b)
+    input_seq_batch_b = torch.LongTensor(input_seq_batch_b).to(device)
+
+    model_bwd = lstm_model.get_backward_lstm_model(load_from_file=True)
+    output_prb_b = torch.softmax(model_bwd(input_seq_batch_b, input_seq_length), dim=-1)
+    output_prb_b = output_prb_b.cpu().detach().numpy()
+
+    return output_prb_b
+
 def get_prob_in_idx(input_seq, I):
     S = len(list(input_seq))
     output_prb_f, output_prb_b = get_model_probs(input_seq)
 
-    final_op = np.zeros((output_prb_f.shape[1]))
+    final_op = (I * output_prb_f[I - 1] + (S - I - 1) * output_prb_b[S - I - 2]) / (S - 1)
 
-    for i in range(len(final_op)):
-        final_op[i] = (I * output_prb_f[I - 1][i] + (S - I - 1) * output_prb_b[S - I - 2][i]) / (S - 1)
+    # final_op = np.zeros((output_prb_f.shape[1]))
+    #
+    # for i in range(len(final_op)):
+    #     final_op[i] = (I * output_prb_f[I - 1][i] + (S - I - 1) * output_prb_b[S - I - 2][i]) / (S - 1)
 
     candidates_replacement = (np.argsort(-final_op))
 
     return final_op, candidates_replacement
 
 
+def get_prob_in_idx_2(input_seq, I):
+
+    S = len(list(input_seq))
+
+    if I > S/2:
+        output_prb_f = get_model_probs_f(input_seq)
+        final_op = output_prb_f[I - 1]
+    else:
+        output_prb_b = get_model_probs_b(input_seq)
+        final_op = output_prb_b[S - I - 2]
+
+    return final_op
+
+
 def get_traj_perplexity(input_seq):
     if len(input_seq) == 0:
         return 1000, 0.0
 
-    output_prb_f, output_prb_b = get_model_probs(input_seq)
+    output_prb_f = get_model_probs_f(input_seq)
+
     fwd_perplexity = 0
-
-    raw_prob_fwd = 1
-    raw_prob_bwd = 1
-
     for i in range(1, len(input_seq)):
         prob_idx = output_prb_f[i - 1][input_seq[i]]
-        raw_prob_fwd *= prob_idx
         if prob_idx != 0:
             fwd_perplexity += np.log(prob_idx)
         else:
             fwd_perplexity += -100
 
-    fwd_perplexity = (1 / len(input_seq) ** 0.4) * (-1.0) * fwd_perplexity
-
-    bwd_perplexity = 0
-    input_seq_b = list(reversed(list(input_seq)))
-    for i in range(1, len(input_seq_b)):
-        prob_idx = output_prb_b[i - 1][input_seq_b[i]]
-        raw_prob_bwd *= prob_idx
-        if prob_idx != 0:
-            bwd_perplexity += np.log(prob_idx)
-        else:
-            bwd_perplexity += -100
-
-    bwd_perplexity = (1 / len(input_seq) ** 0.4) * (-1.0) * bwd_perplexity
-
-    perplexity = 0.5 * (fwd_perplexity + bwd_perplexity)
-
-    return perplexity
+    return fwd_perplexity
 
 
 def normalize(x):
@@ -166,7 +208,60 @@ def sampling_algo(barebone_seq, N_max=10, N_min=3):
 
     return ans_traj
 
-# sampling_algo([6, 11, 0], 10)
+
+def sampling_algo_2(barebone_seq, N_max=5, N_min=5):
+    def replace_poi(input_seq, idx):
+
+        '''
+
+        final_prob, _ = get_prob_in_idx(seq, idx)
+
+        for i in range(len(old_seq)):
+            final_prob[old_seq[i]] = 0
+
+        sampled_idx = sample_from_candidate(final_prob)
+        seq[idx] = sampled_idx
+
+        '''
+
+        input_seq = list(input_seq)
+
+        final_prob = get_prob_in_idx_2(input_seq, idx)
+
+        for input_seq_idx in range(len(input_seq)):
+            final_prob[input_seq[input_seq_idx]] = 0
+
+        sampled_idx = sample_from_candidate(final_prob)
+        input_seq[idx] = sampled_idx
+
+        return input_seq
+
+    N = N_max
+
+    dummy_candidate_seq = np.arange(N)
+    dummy_candidate_seq[0] = barebone_seq[0]
+    dummy_candidate_seq[-1] = barebone_seq[-1]
+    best_perp = 1000
+    best_traj = barebone_seq
+
+    for i in range(1, N - 1):
+        curr_candidate_seq = dummy_candidate_seq.copy()
+        curr_candidate_seq[i] = barebone_seq[1]
+        for j in range(3):
+            for k in range(1, N - 1):
+                if k == i:
+                    continue
+                curr_candidate_seq = replace_poi(curr_candidate_seq, k)
+            curr_candidate_seq_perp = get_traj_perplexity(curr_candidate_seq)
+
+            if best_perp == 1000 or best_perp < curr_candidate_seq_perp:
+                best_perp = curr_candidate_seq_perp
+                best_traj = curr_candidate_seq
+
+    return best_traj
+
+# sampling_algo_2([6, 11, 0], 5)
+
 #
 #
 # def get_diverse_traj(poi_start, poi_end, no_diverse_traj):
