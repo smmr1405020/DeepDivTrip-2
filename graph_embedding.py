@@ -159,7 +159,7 @@ def train_GAE_BCELoss(adj_matrix):
 def get_POI_embeddings(load_from_file=False):
     if not load_from_file:
         parameters.ae_hidden1_dim = 20
-        parameters.ae_hidden2_dim = 16
+        parameters.ae_hidden2_dim = 8
         parameters.ae_num_epoch = 5000
         parameters.ae_learning_rate = 0.05
 
@@ -173,7 +173,7 @@ def get_POI_embeddings(load_from_file=False):
         # plt.show()
 
         parameters.ae_hidden1_dim = 64
-        parameters.ae_hidden2_dim = 32
+        parameters.ae_hidden2_dim = 12
         parameters.ae_num_epoch = 30000
         parameters.ae_learning_rate = 0.01
 
@@ -185,7 +185,7 @@ def get_POI_embeddings(load_from_file=False):
         # plt.show()
 
         parameters.ae_hidden1_dim = 64
-        parameters.ae_hidden2_dim = 32
+        parameters.ae_hidden2_dim = 12
         parameters.ae_num_epoch = 30000
         parameters.ae_learning_rate = 0.01
 
