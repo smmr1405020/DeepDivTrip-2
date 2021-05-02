@@ -20,10 +20,7 @@ class TrajPredictor(nn.Module):
         super(TrajPredictor, self).__init__()
 
         self.embedding = nn.Embedding(len(data_generator.vocab_to_int) - 3,
-                                      embedding_dim=pretrained_node_embeddings.shape[1]).from_pretrained(
-            pretrained_node_embeddings,
-            freeze=False)
-
+                                      embedding_dim=pretrained_node_embeddings.shape[1])
         '''
 
         '''
