@@ -158,35 +158,35 @@ def train_GAE_BCELoss(adj_matrix):
 
 def get_POI_embeddings(load_from_file=False):
     if not load_from_file:
-        parameters.ae_hidden1_dim = 20
-        parameters.ae_hidden2_dim = 16
-        parameters.ae_num_epoch = 5000
-        parameters.ae_learning_rate = 0.05
-
-        Z_final_cat = train_GAE_BCELoss(data_generator.poi_category_matrix)
-        Z_final_norm_cat = np.linalg.norm(Z_final_cat, axis=1, keepdims=True)
-        Z_final_cat = Z_final_cat / Z_final_norm_cat
+        # parameters.ae_hidden1_dim = 20
+        # parameters.ae_hidden2_dim = 16
+        # parameters.ae_num_epoch = 5000
+        # parameters.ae_learning_rate = 0.05
+        #
+        # Z_final_cat = train_GAE_BCELoss(data_generator.poi_category_matrix)
+        # Z_final_norm_cat = np.linalg.norm(Z_final_cat, axis=1, keepdims=True)
+        # Z_final_cat = Z_final_cat / Z_final_norm_cat
 
         # cat_r = np.matmul(Z_final_cat,Z_final_cat.T)
         # plt.imshow(cat_r, cmap='hot', interpolation='nearest')
         # plt.colorbar()
         # plt.show()
 
-        parameters.ae_hidden1_dim = 32
-        parameters.ae_hidden2_dim = 24
-        parameters.ae_num_epoch = 20000
-        parameters.ae_learning_rate = 0.01
-
-        Z_final_dist = train_GAE_rmsLoss(data_generator.poi_distance_matrix)
+        # parameters.ae_hidden1_dim = 128
+        # parameters.ae_hidden2_dim = 64
+        # parameters.ae_num_epoch = 20000
+        # parameters.ae_learning_rate = 0.01
+        #
+        # Z_final_dist = train_GAE_rmsLoss(data_generator.poi_distance_matrix)
 
         # dist_r = np.matmul(Z_final_dist, Z_final_dist.T)
         # plt.imshow(dist_r, cmap='hot', interpolation='nearest')
         # plt.colorbar()
         # plt.show()
 
-        parameters.ae_hidden1_dim = 32
-        parameters.ae_hidden2_dim = 24
-        parameters.ae_num_epoch = 20000
+        parameters.ae_hidden1_dim = 128
+        parameters.ae_hidden2_dim = 64
+        parameters.ae_num_epoch = 40000
         parameters.ae_learning_rate = 0.01
 
         Z_final_trans = train_GAE_rmsLoss(adj_matrix=data_generator.poi_transition_matrix_normalized,
@@ -197,7 +197,9 @@ def get_POI_embeddings(load_from_file=False):
         # plt.colorbar()
         # plt.show()
 
-        Z_final_concat = np.concatenate([Z_final_dist, Z_final_cat, Z_final_trans], axis=1)
+        #Z_final_concat = np.concatenate([Z_final_dist, Z_final_cat, Z_final_trans], axis=1)
+
+        Z_final_concat = Z_final_trans
 
         np.save(os.path.join("model_files", "POI_embedding_" + data_generator.embedding_name + ".npy"),
                 Z_final_concat)
