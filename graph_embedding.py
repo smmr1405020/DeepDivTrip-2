@@ -158,14 +158,14 @@ def train_GAE_BCELoss(adj_matrix):
 
 def get_POI_embeddings(load_from_file=False):
     if not load_from_file:
-        # parameters.ae_hidden1_dim = 20
-        # parameters.ae_hidden2_dim = 16
-        # parameters.ae_num_epoch = 5000
-        # parameters.ae_learning_rate = 0.05
-        #
-        # Z_final_cat = train_GAE_BCELoss(data_generator.poi_category_matrix)
-        # Z_final_norm_cat = np.linalg.norm(Z_final_cat, axis=1, keepdims=True)
-        # Z_final_cat = Z_final_cat / Z_final_norm_cat
+        parameters.ae_hidden1_dim = 20
+        parameters.ae_hidden2_dim = 16
+        parameters.ae_num_epoch = 5000
+        parameters.ae_learning_rate = 0.05
+
+        Z_final_cat = train_GAE_BCELoss(data_generator.poi_category_matrix)
+        Z_final_norm_cat = np.linalg.norm(Z_final_cat, axis=1, keepdims=True)
+        Z_final_cat = Z_final_cat / Z_final_norm_cat
 
         # cat_r = np.matmul(Z_final_cat,Z_final_cat.T)
         # plt.imshow(cat_r, cmap='hot', interpolation='nearest')
