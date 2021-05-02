@@ -186,7 +186,7 @@ def get_POI_embeddings(load_from_file=False):
 
         parameters.ae_hidden1_dim = 32
         parameters.ae_hidden2_dim = 24
-        parameters.ae_num_epoch = 30000
+        parameters.ae_num_epoch = 20000
         parameters.ae_learning_rate = 0.01
 
         Z_final_trans = train_GAE_rmsLoss(adj_matrix=data_generator.poi_transition_matrix_normalized,
