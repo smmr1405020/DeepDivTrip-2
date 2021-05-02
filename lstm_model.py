@@ -20,39 +20,28 @@ class TrajPredictor(nn.Module):
         super(TrajPredictor, self).__init__()
 
         self.embedding = nn.Embedding(len(data_generator.vocab_to_int) - 3,
-                                      embedding_dim=pretrained_node_embeddings.shape[1]).from_pretrained(
-            pretrained_node_embeddings,
-            freeze=False)
+                                      embedding_dim=pretrained_node_embeddings.shape[1])
 
         '''
 
         '''
         self.embedding_dim = pretrained_node_embeddings.shape[1]
-        self.vocab_size = pretrained_node_embeddings.shape[0]
+        self.vocab_size = len(data_generator.vocab_to_int) - 3
         self.hidden_size = hidden_size
         self.encoder = nn.LSTM(input_size=self.embedding_dim,
                                hidden_size=self.hidden_size, num_layers=1)
 
-        self.linear_inp_size = self.hidden_size + self.embedding_dim
-        self.fc1 = nn.Linear(self.linear_inp_size, 30)
-        self.fc2 = nn.Linear(30, 1)
+        self.linear_inp_size = self.hidden_size
+        self.fc1 = nn.Linear(self.linear_inp_size, self.vocab_size)
 
     def forward(self, seq, seq_lengths):
         embeds = self.embedding(seq)
         lstm_input = nn.utils.rnn.pack_padded_sequence(embeds, seq_lengths.cpu(), batch_first=False)
-
-        poi_emb_unsqueezed = torch.unsqueeze(torch.unsqueeze(self.embedding.weight, 0), 0)
-        poi_emb_repeated = poi_emb_unsqueezed.repeat(seq.shape[0], seq.shape[1], 1, 1)
-
         output, (hidden, _) = self.encoder(lstm_input)
         output, _ = nn.utils.rnn.pad_packed_sequence(output)
 
-        output_unsqueezed = torch.unsqueeze(output, 2)
-        output_repeated = output_unsqueezed.repeat(1, 1, poi_emb_repeated.shape[2], 1)
-        poi_out_concat = torch.cat([poi_emb_repeated, output_repeated], dim=3)
-        out_1 = torch.relu(self.fc1(poi_out_concat))
-        out_2 = self.fc2(out_1)
-        out_sq = torch.squeeze(out_2)
+        out_sq = self.fc1(output)
+        out_sq = torch.squeeze(out_sq)
 
         return out_sq
 
