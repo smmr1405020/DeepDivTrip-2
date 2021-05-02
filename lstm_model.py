@@ -20,7 +20,10 @@ class TrajPredictor(nn.Module):
         super(TrajPredictor, self).__init__()
 
         self.embedding = nn.Embedding(len(data_generator.vocab_to_int) - 3,
-                                      embedding_dim=pretrained_node_embeddings.shape[1])
+                                      embedding_dim=pretrained_node_embeddings.shape[1]).from_pretrained(
+            pretrained_node_embeddings,
+            freeze=True)
+
         '''
 
         '''
@@ -156,9 +159,9 @@ def get_forward_lstm_model(load_from_file=True):
     pretrained_embeddings = torch.FloatTensor(pretrained_embeddings).to(device)
     if not load_from_file:
         trajpredictor_forward = TrajPredictor(pretrained_embeddings, parameters.lstm_model_hidden_size).to(device)
-        optimizer_forward = optim.Adam(trajpredictor_forward.parameters(), lr=0.0008)
+        optimizer_forward = optim.Adam(trajpredictor_forward.parameters(), lr=0.001)
         print("\nForward")
-        train(trajpredictor_forward, optimizer_forward, loss_fn, epochs=200)
+        train(trajpredictor_forward, optimizer_forward, loss_fn, epochs=80)
         print("\n")
     forward_lstm_model = TrajPredictor(pretrained_embeddings, parameters.lstm_model_hidden_size).to(device)
     fwd_model_state_dict = torch.load(os.path.join("model_files", "LSTM_net_1_f_" + data_generator.embedding_name))
@@ -175,9 +178,9 @@ def get_backward_lstm_model(load_from_file=True):
     pretrained_embeddings = torch.FloatTensor(pretrained_embeddings).to(device)
     if not load_from_file:
         trajpredictor_backward = TrajPredictor(pretrained_embeddings, parameters.lstm_model_hidden_size).to(device)
-        optimizer_backward = optim.Adam(trajpredictor_backward.parameters(), lr=0.0008)
+        optimizer_backward = optim.Adam(trajpredictor_backward.parameters(), lr=0.001)
         print("\nBackward")
-        train(trajpredictor_backward, optimizer_backward, loss_fn, epochs=200, backward_model=True)
+        train(trajpredictor_backward, optimizer_backward, loss_fn, epochs=80, backward_model=True)
         print("\n")
     backward_lstm_model = TrajPredictor(pretrained_embeddings, parameters.lstm_model_hidden_size).to(device)
     bwd_model_state_dict = torch.load(os.path.join("model_files", "LSTM_net_1_b_" + data_generator.embedding_name))
