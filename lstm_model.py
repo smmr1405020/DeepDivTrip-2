@@ -34,8 +34,8 @@ class TrajPredictor(nn.Module):
                                hidden_size=self.hidden_size, num_layers=1)
 
         self.linear_inp_size = self.hidden_size + self.embedding_dim
-        self.fc1 = nn.Linear(self.linear_inp_size, 30)
-        self.fc2 = nn.Linear(30, 1)
+        self.fc1 = nn.Linear(self.linear_inp_size, 32)
+        self.fc2 = nn.Linear(32, 1)
 
     def forward(self, seq, seq_lengths):
         embeds = self.embedding(seq)
@@ -159,7 +159,7 @@ def get_forward_lstm_model(load_from_file=True):
     pretrained_embeddings = torch.FloatTensor(pretrained_embeddings).to(device)
     if not load_from_file:
         trajpredictor_forward = TrajPredictor(pretrained_embeddings, parameters.lstm_model_hidden_size).to(device)
-        optimizer_forward = optim.Adagrad(trajpredictor_forward.parameters(), lr=0.001)
+        optimizer_forward = optim.Adadelta(trajpredictor_forward.parameters(), lr=0.001)
         print("\nForward")
         train(trajpredictor_forward, optimizer_forward, loss_fn, epochs=400)
         print("\n")
@@ -178,7 +178,7 @@ def get_backward_lstm_model(load_from_file=True):
     pretrained_embeddings = torch.FloatTensor(pretrained_embeddings).to(device)
     if not load_from_file:
         trajpredictor_backward = TrajPredictor(pretrained_embeddings, parameters.lstm_model_hidden_size).to(device)
-        optimizer_backward = optim.Adagrad(trajpredictor_backward.parameters(), lr=0.001)
+        optimizer_backward = optim.Adadelta(trajpredictor_backward.parameters(), lr=0.001)
         print("\nBackward")
         train(trajpredictor_backward, optimizer_backward, loss_fn, epochs=400, backward_model=True)
         print("\n")
