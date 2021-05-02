@@ -26,22 +26,31 @@ class TrajPredictor(nn.Module):
 
         '''
         self.embedding_dim = pretrained_node_embeddings.shape[1]
-        self.vocab_size = len(data_generator.vocab_to_int) - 3
+        self.vocab_size = pretrained_node_embeddings.shape[0]
         self.hidden_size = hidden_size
         self.encoder = nn.LSTM(input_size=self.embedding_dim,
                                hidden_size=self.hidden_size, num_layers=1)
 
-        self.linear_inp_size = self.hidden_size
-        self.fc1 = nn.Linear(self.linear_inp_size, self.vocab_size)
+        self.linear_inp_size = self.hidden_size + self.embedding_dim
+        self.fc1 = nn.Linear(self.linear_inp_size, 30)
+        self.fc2 = nn.Linear(30, 1)
 
     def forward(self, seq, seq_lengths):
         embeds = self.embedding(seq)
         lstm_input = nn.utils.rnn.pack_padded_sequence(embeds, seq_lengths.cpu(), batch_first=False)
+
+        poi_emb_unsqueezed = torch.unsqueeze(torch.unsqueeze(self.embedding.weight, 0), 0)
+        poi_emb_repeated = poi_emb_unsqueezed.repeat(seq.shape[0], seq.shape[1], 1, 1)
+
         output, (hidden, _) = self.encoder(lstm_input)
         output, _ = nn.utils.rnn.pad_packed_sequence(output)
 
-        out_sq = self.fc1(output)
-        out_sq = torch.squeeze(out_sq)
+        output_unsqueezed = torch.unsqueeze(output, 2)
+        output_repeated = output_unsqueezed.repeat(1, 1, poi_emb_repeated.shape[2], 1)
+        poi_out_concat = torch.cat([poi_emb_repeated, output_repeated], dim=3)
+        out_1 = torch.relu(self.fc1(poi_out_concat))
+        out_2 = self.fc2(out_1)
+        out_sq = torch.squeeze(out_2)
 
         return out_sq
 
@@ -150,7 +159,7 @@ def get_forward_lstm_model(load_from_file=True):
         trajpredictor_forward = TrajPredictor(pretrained_embeddings, parameters.lstm_model_hidden_size).to(device)
         optimizer_forward = optim.Adam(trajpredictor_forward.parameters(), lr=0.001)
         print("\nForward")
-        train(trajpredictor_forward, optimizer_forward, loss_fn, epochs=160)
+        train(trajpredictor_forward, optimizer_forward, loss_fn, epochs=80)
         print("\n")
     forward_lstm_model = TrajPredictor(pretrained_embeddings, parameters.lstm_model_hidden_size).to(device)
     fwd_model_state_dict = torch.load(os.path.join("model_files", "LSTM_net_1_f_" + data_generator.embedding_name))
@@ -169,7 +178,7 @@ def get_backward_lstm_model(load_from_file=True):
         trajpredictor_backward = TrajPredictor(pretrained_embeddings, parameters.lstm_model_hidden_size).to(device)
         optimizer_backward = optim.Adam(trajpredictor_backward.parameters(), lr=0.001)
         print("\nBackward")
-        train(trajpredictor_backward, optimizer_backward, loss_fn, epochs=160, backward_model=True)
+        train(trajpredictor_backward, optimizer_backward, loss_fn, epochs=80, backward_model=True)
         print("\n")
     backward_lstm_model = TrajPredictor(pretrained_embeddings, parameters.lstm_model_hidden_size).to(device)
     bwd_model_state_dict = torch.load(os.path.join("model_files", "LSTM_net_1_b_" + data_generator.embedding_name))
