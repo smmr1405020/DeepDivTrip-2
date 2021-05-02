@@ -38,7 +38,7 @@ class TrajPredictor(nn.Module):
 
     def forward(self, seq, seq_lengths):
         embeds = self.embedding(seq)
-        lstm_input = nn.utils.rnn.pack_padded_sequence(embeds, seq_lengths, batch_first=False)
+        lstm_input = nn.utils.rnn.pack_padded_sequence(embeds, seq_lengths.cpu(), batch_first=False)
         output, (hidden, _) = self.encoder(lstm_input)
         output, _ = nn.utils.rnn.pad_packed_sequence(output)
 
