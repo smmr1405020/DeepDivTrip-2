@@ -34,8 +34,8 @@ class TrajPredictor(nn.Module):
                                hidden_size=self.hidden_size, num_layers=1)
 
         self.linear_inp_size = self.hidden_size + self.embedding_dim
-        self.fc1 = nn.Linear(self.linear_inp_size, 32)
-        self.fc2 = nn.Linear(32, 1)
+        self.fc1 = nn.Linear(self.linear_inp_size, 64)
+        self.fc2 = nn.Linear(64, 1)
 
     def forward(self, seq, seq_lengths):
         embeds = self.embedding(seq)
