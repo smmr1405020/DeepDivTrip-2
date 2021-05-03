@@ -31,6 +31,6 @@ Ns = [(3, 3), (5, 5), (7, 7), (9, 9)]
 
 for Nmn, Nmx in Ns:
     if Nmn == 3:
-        generate_result(True, K=3, N_min=Nmn, N_max=Nmx)
+        generate_result(False, K=3, N_min=Nmn, N_max=Nmx)
     else:
         generate_result(True, K=3, N_min=Nmn, N_max=Nmx)

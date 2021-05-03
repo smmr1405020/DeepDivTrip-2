@@ -60,9 +60,12 @@ def generate_result(load_from_file, K, N_min, N_max):
 
         use_freq = np.zeros([len(lstm_rank)])
         all_traj = []
+        previous_prominent_pois = []
         for i in range(K):
             use_freq, next_poi = get_next_poi(use_freq, lstm_rank)
-            new_traj = gibbs_sample.sampling_algo([poi_start, next_poi, poi_end], N_max=N_max, N_min=N_min)
+            new_traj = gibbs_sample.sampling_algo_2([poi_start, next_poi, poi_end],
+                                                  N_max=N_max, N_min=N_min)
+            previous_prominent_pois.append(next_poi)
             for j in range(len(new_traj)):
                 use_freq[new_traj[j]] += 1
             all_traj.append(new_traj)

@@ -119,9 +119,7 @@ def get_prob_in_idx_2(input_seq, I):
         output_prb_b = get_model_probs_b(input_seq)
         final_op = output_prb_b[S - I - 2]
 
-    candidates_replacement = (np.argsort(-final_op))
-
-    return final_op, candidates_replacement
+    return final_op
 
 
 def get_traj_perplexity(input_seq):
@@ -165,45 +163,63 @@ def choose_action(c):
             return i
 
 
-def sampling_algo(barebone_seq, N_max=10, N_min=3):
-    ans_traj = None
-    ans_traj_perp = 1000.0
+def get_refined_traj(input_seq, prominent_poi_pos):
+    prominent_poi = input_seq[prominent_poi_pos]
+    N = len(input_seq)
+    output_prob_f, output_prob_b = get_model_probs(input_seq)
 
-    if N_min <= len(barebone_seq) <= N_max:
-        ans_traj = barebone_seq.copy()
-        ans_traj_perp = get_traj_perplexity(barebone_seq)
+    prominent_poi_probs = [0.0]
+    substitute_poi = -1
+    for i in range(1, N - 1):
+        if i <= N / 2:
+            final_prob = output_prob_f[i - 1]
+            prominent_poi_probs.append(final_prob[prominent_poi])
+        else:
+            final_prob = output_prob_b[N - i - 2]
+            prominent_poi_probs.append(final_prob[prominent_poi])
+        for input_seq_idx in range(len(input_seq)):
+            final_prob[input_seq[input_seq_idx]] = 0
 
-    current_traj = barebone_seq.copy()
+        sampled_idx = sample_from_candidate(final_prob)
+        if i != prominent_poi_pos:
+            input_seq[i] = sampled_idx
 
-    def insert_poi(input_seq, idx):
+    prominent_poi_idx = np.argmax(prominent_poi_probs)
+    input_seq[prominent_poi_idx] = prominent_poi
+    if int(prominent_poi_idx) != prominent_poi_pos:
+        input_seq[prominent_poi_pos] = substitute_poi
+        if prominent_poi_pos <= N / 2:
+            final_prob = output_prob_f[prominent_poi_pos - 1]
+        else:
+            final_prob = output_prob_b[N - prominent_poi_pos - 1]
+        for input_seq_idx in range(len(input_seq)):
+            final_prob[input_seq[input_seq_idx]] = 0
+        sampled_idx = sample_from_candidate(final_prob)
+        input_seq[prominent_poi_pos] = sampled_idx
 
-        original_input_seq = input_seq.copy()
+    return input_seq, prominent_poi_idx
 
-        input_seq = list(input_seq)
-        input_seq.insert(idx, 0)
 
-        final_prob, candidate_poi = get_prob_in_idx_2(input_seq, idx)
+def sampling_algo_2(barebone_seq, N_max=5, N_min=5):
+    N = N_max
 
-        for poi in original_input_seq:
-            final_prob[poi] = 0
+    dummy_candidate_seq = np.arange(N)
+    dummy_candidate_seq[0] = barebone_seq[0]
+    dummy_candidate_seq[-1] = barebone_seq[-1]
+    best_perp = 1000
+    best_traj = barebone_seq
 
-        return input_seq
+    prominent_poi_idx = np.random.randint(1, N - 1)
+    dummy_candidate_seq[prominent_poi_idx] = barebone_seq[1]
 
-    for l in range(len(barebone_seq), N_max + 1):
-        min_perp_traj = current_traj
-        min_perp = 100.0
-        for i in range(1, len(current_traj)):
-            current_traj_candidate = insert_poi(current_traj.copy(), i)
-            current_traj_perp = get_traj_perplexity(current_traj_candidate)
+    curr_candidate_seq = dummy_candidate_seq
+    curr_prominent_poi_idx = prominent_poi_idx
+    for j in range(6):
+        curr_candidate_seq, curr_prominent_poi_idx = get_refined_traj(curr_candidate_seq, curr_prominent_poi_idx)
+        curr_candidate_seq_perp = get_traj_perplexity(curr_candidate_seq)
 
-            if i == 1 or current_traj_perp < min_perp:
-                min_perp = current_traj_perp
-                min_perp_traj = current_traj_candidate
+        if best_perp == 1000 or best_perp > curr_candidate_seq_perp:
+            best_perp = curr_candidate_seq_perp
+            best_traj = curr_candidate_seq
 
-        if (N_min <= len(min_perp_traj) <= N_max) and (ans_traj is None or min_perp < ans_traj_perp):
-            ans_traj_perp = min_perp
-            ans_traj = min_perp_traj
-
-        current_traj = min_perp_traj
-
-    return ans_traj
+    return best_traj
