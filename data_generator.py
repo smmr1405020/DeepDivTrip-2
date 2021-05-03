@@ -3,7 +3,6 @@ import random
 import numpy as np
 import csv
 import args_kdiverse
-import matplotlib.pyplot as plt
 
 pp = pprint.PrettyPrinter(indent=4, width=180)
 dat_ix = args_kdiverse.dat_ix
@@ -495,27 +494,29 @@ class dataset_trajectory(object):
 
     def process_batch(self, inp_batch, inp_seq_batch):
 
+        sd_batch_final = [[ls[0], ls[-1]] for ls in inp_batch]
+
         inp_seq_batch_final = [ln - 1 for ln in inp_seq_batch]
         max_length_batch = np.max(inp_seq_batch)
         inp_batch_final = [ls[:-1] + [self.pad_id] * (max_length_batch - len(ls)) for ls in inp_batch]
         tgt_batch_final = [ls[1:] + [self.pad_id] * (max_length_batch - len(ls)) for ls in inp_batch]
 
-        zp = zip(inp_batch_final, inp_seq_batch_final, tgt_batch_final)
+        zp = zip(inp_batch_final, inp_seq_batch_final, tgt_batch_final, sd_batch_final)
         zp_l = list(zp)
         zp_l = sorted(zp_l, key=lambda tuple: tuple[1], reverse=True)
 
-        ib, sb, tb = zip(*zp_l)
+        ib, sb, tb, sdb = zip(*zp_l)
         ib = list(ib)
         sb = list(sb)
         tb = list(tb)
+        sdb = list(sdb)
 
         ib = np.array(ib)
-        ib = np.transpose(ib)
         sb = np.array(sb)
         tb = np.array(tb)
-        tb = np.transpose(tb)
+        sdb = np.array(sdb)
 
-        return ib, sb, tb
+        return ib, sb, tb, sdb
 
     def no_training_batches(self, batch_size):
 
@@ -546,95 +547,24 @@ class dataset_trajectory(object):
 
 
 def get_trajectory_dataset():
-    all_traj_data_train = get_inflated_dataset(get_all_raw_routes(query_dict_trajectory_train, query_dict_freq_train))
+    all_traj_data_train = get_all_raw_routes(query_dict_trajectory_train, query_dict_freq_train)
     np.random.shuffle(all_traj_data_train)
     all_traj_data_train_seq = []
 
     for j in range(len(all_traj_data_train)):
         all_traj_data_train_seq.append(len(all_traj_data_train[j]))
 
-    return dataset_trajectory(all_traj_data_train, all_traj_data_train_seq), \
-           dataset_trajectory(all_traj_data_train, all_traj_data_train_seq, backward=True)
+    return dataset_trajectory(all_traj_data_train, all_traj_data_train_seq), dataset_trajectory(all_traj_data_train,
+                                                                                                all_traj_data_train_seq,
+                                                                                                backward=True)
 
 
-#
 # dt, dt_b = get_trajectory_dataset()
 #
 # for i in range(8):
-#     ib, sb, tb = dt(i, 8)
+#     ib, sb, tb, sdb = dt(i, 8)
 #     print(ib)
 #     print(tb)
 #     print(sb)
+#     print(sdb)
 #     print("\n\n\n")
-
-# pp.pprint(query_dict_trajectory_test)
-
-# plt.imshow(POI_transition_matrix(query_dict_trajectory_train,query_dict_freq_train), cmap='hot', interpolation='nearest')
-# plt.colorbar()
-# plt.show()
-#
-# plt.imshow(get_poi_transition_matrix(query_dict_trajectory_test,query_dict_freq_test), cmap='hot', interpolation='nearest')
-# plt.colorbar()
-# plt.show()
-
-# pp.pprint(get_all_raw_routes(query_dict_trajectory_train, query_dict_freq_train))
-
-def get_augmented_routes(original_route):
-    augmented_routes = []
-
-    # substrings
-    for path_length in range(3, len(original_route)):
-        for j in range(0, len(original_route) - path_length + 1):
-            path = original_route[j:j + path_length]
-            augmented_routes.append(path)
-
-    # deletion 1 node [min length 4]
-    if len(original_route) >= 4:
-        for i in range(1, len(original_route) - 1):
-            new_route = original_route.copy()
-            new_route.pop(i)
-            augmented_routes.append(new_route)
-
-    # deletion 2 node [min length 5]
-    # if len(original_route) >= 5:
-    #     for i, j in (
-    #             [(i1, i2) for i1 in range(1, len(original_route) - 1) for i2 in range(1, len(original_route) - 1)]):
-    #         new_route = original_route.copy()
-    #         new_route.pop(i)
-    #         new_route.pop(j)
-    #         augmented_routes.append(new_route)
-
-    # insertion 1 node
-    for i in range(1, len(original_route) - 1):
-        can_insert = False
-        poi_before = original_route[i - 1]
-        poi_after = original_route[i + 1]
-        itr = 0
-
-        while not can_insert and itr < 5:
-            poi = np.random.choice(np.arange(0, len(vocab_to_int) - 3))
-            if poi not in original_route and poi_transition_matrix[poi_before][poi] > 0 \
-                    and poi_transition_matrix[poi][poi_after] > 0:
-                new_route = original_route.copy()
-                new_route.insert(i, poi)
-                augmented_routes.append(new_route)
-                can_insert = True
-
-            itr += 1
-
-    return augmented_routes
-
-
-# get_augmented_routes([1, 2, 3, 4, 5])
-
-
-def get_inflated_dataset(all_routes):
-    all_augmented_routes = all_routes.copy()
-    for original_route in all_routes:
-        augmented_routes = get_augmented_routes(original_route)
-        all_augmented_routes = all_augmented_routes + augmented_routes
-
-    # pp.pprint(len(all_augmented_routes))
-    return all_augmented_routes
-
-# get_inflated_dataset(get_all_raw_routes(query_dict_trajectory_train, query_dict_freq_train))

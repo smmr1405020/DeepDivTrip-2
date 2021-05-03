@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../aaai_myalgo_final/.idea/aaai_myalgo_final.iml" filepath="$PROJECT_DIR$/../aaai_myalgo_final/.idea/aaai_myalgo_final.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/deepDivTrip_new.iml" filepath="$PROJECT_DIR$/.idea/deepDivTrip_new.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../deepdivtrip_wos/.idea/deepdivtrip_wos.iml" filepath="$PROJECT_DIR$/../deepdivtrip_wos/.idea/deepdivtrip_wos.iml" />
     </modules>
   </component>
 </project>

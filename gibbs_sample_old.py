@@ -119,9 +119,7 @@ def get_prob_in_idx_2(input_seq, I):
         output_prb_b = get_model_probs_b(input_seq)
         final_op = output_prb_b[S - I - 2]
 
-    candidates_replacement = (np.argsort(-final_op))
-
-    return final_op, candidates_replacement
+    return final_op
 
 
 def get_traj_perplexity(input_seq):
@@ -182,10 +180,12 @@ def sampling_algo(barebone_seq, N_max=10, N_min=3):
         input_seq = list(input_seq)
         input_seq.insert(idx, 0)
 
-        final_prob, candidate_poi = get_prob_in_idx_2(input_seq, idx)
+        final_prob, candidate_poi = get_prob_in_idx(input_seq, idx)
 
-        for poi in original_input_seq:
-            final_prob[poi] = 0
+        for poi in candidate_poi:
+            if poi not in original_input_seq:
+                input_seq[idx] = poi
+                break
 
         return input_seq
 
@@ -200,7 +200,7 @@ def sampling_algo(barebone_seq, N_max=10, N_min=3):
                 min_perp = current_traj_perp
                 min_perp_traj = current_traj_candidate
 
-        if (N_min <= len(min_perp_traj) <= N_max) and (ans_traj is None or min_perp < ans_traj_perp):
+        if (N_min <= len(min_perp_traj) <= N_max) and (min_perp > ans_traj_perp or ans_traj is None):
             ans_traj_perp = min_perp
             ans_traj = min_perp_traj
 

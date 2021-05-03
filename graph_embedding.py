@@ -6,7 +6,6 @@ import os
 import numpy as np
 import data_generator
 import parameters
-import matplotlib.pyplot as plt
 
 np.random.seed(1234567890)
 torch.manual_seed(1234567890)
@@ -108,7 +107,7 @@ def train_GAE_rmsLoss(adj_matrix, add_eye=True):
 
         train_rms_loss = get_rms_loss(A_pred, adj_label)
 
-        if epoch % 20000 == 0 or epoch == parameters.ae_num_epoch - 1:
+        if epoch % 200 == 0 or epoch == parameters.ae_num_epoch - 1:
             print("Epoch:", '%04d' % (epoch + 1), "train_loss=", "{:.5f}".format(loss.item()),
                   "train_rms_loss = ", "{:.5f}".format(train_rms_loss),
                   "time=", "{:.5f}".format(time.time() - t))
@@ -147,7 +146,7 @@ def train_GAE_BCELoss(adj_matrix):
         loss.backward()
         optimizer.step()
 
-        if epoch % 500 == 0 or epoch == parameters.ae_num_epoch - 1:
+        if epoch % 50 == 0 or epoch == parameters.ae_num_epoch - 1:
             print("Epoch:", '%04d' % (epoch + 1), "train_loss=", "{:.5f}".format(loss.item()))
 
     print("\n\n")
@@ -160,8 +159,8 @@ def get_POI_embeddings(load_from_file=False):
     if not load_from_file:
         parameters.ae_hidden1_dim = 20
         parameters.ae_hidden2_dim = 16
-        parameters.ae_num_epoch = 15000
-        parameters.ae_learning_rate = 0.1
+        parameters.ae_num_epoch = 5000
+        parameters.ae_learning_rate = 0.05
 
         Z_final_cat = train_GAE_BCELoss(data_generator.poi_category_matrix)
         Z_final_norm_cat = np.linalg.norm(Z_final_cat, axis=1, keepdims=True)
@@ -174,8 +173,8 @@ def get_POI_embeddings(load_from_file=False):
 
         parameters.ae_hidden1_dim = 32
         parameters.ae_hidden2_dim = 24
-        parameters.ae_num_epoch = 100000
-        parameters.ae_learning_rate = 0.1
+        parameters.ae_num_epoch = 20000
+        parameters.ae_learning_rate = 0.01
 
         Z_final_dist = train_GAE_rmsLoss(data_generator.poi_distance_matrix)
 
@@ -186,7 +185,7 @@ def get_POI_embeddings(load_from_file=False):
 
         parameters.ae_hidden1_dim = 32
         parameters.ae_hidden2_dim = 24
-        parameters.ae_num_epoch = 100000
+        parameters.ae_num_epoch = 20000
         parameters.ae_learning_rate = 0.01
 
         Z_final_trans = train_GAE_rmsLoss(adj_matrix=data_generator.poi_transition_matrix_normalized,
@@ -205,4 +204,4 @@ def get_POI_embeddings(load_from_file=False):
     Zb = np.load(os.path.join("model_files", "POI_embedding_" + data_generator.embedding_name + ".npy"))
     return Zb
 
-# get_POI_embeddings(load_from_file=False)
+#get_POI_embeddings(load_from_file=False)
