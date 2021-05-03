@@ -2,19 +2,19 @@ import args_kdiverse
 import os
 import glob
 
-if os.path.exists('model_files'):
+if not os.path.exists('model_files'):
+    os.mkdir('model_files')
+else:
     files = glob.glob('model_files/*')
     for f in files:
         os.remove(f)
-else:
-    os.mkdir('model_files')
 
-if os.path.exists('recset_ddtwos'):
+if not os.path.exists('recset_ddtwos'):
+    os.mkdir('recset_ddtwos')
+else:
     files = glob.glob('recset_ddtwos/*')
     for f in files:
         os.remove(f)
-else:
-    os.mkdir('recset_ddtwos')
 
 args_kdiverse.dat_ix = 2
 args_kdiverse.FOLD = 5

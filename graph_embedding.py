@@ -6,7 +6,6 @@ import os
 import numpy as np
 import data_generator
 import parameters
-import matplotlib.pyplot as plt
 
 np.random.seed(1234567890)
 torch.manual_seed(1234567890)
@@ -197,9 +196,7 @@ def get_POI_embeddings(load_from_file=False):
         # plt.colorbar()
         # plt.show()
 
-        Z_final_concat = np.concatenate([Z_final_dist, Z_final_trans], axis=1)
-
-        #Z_final_concat = Z_final_trans
+        Z_final_concat = np.concatenate([Z_final_dist, Z_final_cat, Z_final_trans], axis=1)
 
         np.save(os.path.join("model_files", "POI_embedding_" + data_generator.embedding_name + ".npy"),
                 Z_final_concat)
@@ -207,4 +204,4 @@ def get_POI_embeddings(load_from_file=False):
     Zb = np.load(os.path.join("model_files", "POI_embedding_" + data_generator.embedding_name + ".npy"))
     return Zb
 
-# get_POI_embeddings(load_from_file=False)
+#get_POI_embeddings(load_from_file=False)

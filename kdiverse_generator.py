@@ -3,9 +3,9 @@ import os
 import metric
 import numpy as np
 import data_generator
-import graph_embedding
 import lstm_model
 import trajectory_generator
+import graph_embedding
 import args_kdiverse
 import time
 

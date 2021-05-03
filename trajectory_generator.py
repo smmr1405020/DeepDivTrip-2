@@ -21,22 +21,23 @@ def get_model_probs(input_seq):
     input_seq_length = [len(input_seq)]
     input_seq_length = torch.LongTensor(input_seq_length).to(device)
 
+    input_seq_sd = [input_seq[0], input_seq[-1]]
+    input_seq_sd = torch.LongTensor(input_seq_sd).to(device)
+
     input_seq_batch_f = [input_seq_f]
     input_seq_batch_f = np.array(input_seq_batch_f)
-    input_seq_batch_f = np.transpose(input_seq_batch_f)
     input_seq_batch_f = torch.LongTensor(input_seq_batch_f).to(device)
 
     model_fwd = lstm_model.get_forward_lstm_model(load_from_file=True)
-    output_prb_f = torch.softmax(model_fwd(input_seq_batch_f, input_seq_length), dim=-1)
+    output_prb_f = torch.softmax(model_fwd(input_seq_batch_f, input_seq_length, input_seq_sd), dim=-1)
     output_prb_f = output_prb_f.cpu().detach().numpy()
 
     input_seq_batch_b = [input_seq_b]
     input_seq_batch_b = np.array(input_seq_batch_b)
-    input_seq_batch_b = np.transpose(input_seq_batch_b)
     input_seq_batch_b = torch.LongTensor(input_seq_batch_b).to(device)
 
     model_bwd = lstm_model.get_backward_lstm_model(load_from_file=True)
-    output_prb_b = torch.softmax(model_bwd(input_seq_batch_b, input_seq_length), dim=-1)
+    output_prb_b = torch.softmax(model_bwd(input_seq_batch_b, input_seq_length, input_seq_sd), dim=-1)
     output_prb_b = output_prb_b.cpu().detach().numpy()
 
     return output_prb_f, output_prb_b
@@ -52,13 +53,15 @@ def get_model_probs_f(input_seq):
     input_seq_length = [len(input_seq)]
     input_seq_length = torch.LongTensor(input_seq_length).to(device)
 
+    input_seq_sd = [input_seq[0], input_seq[-1]]
+    input_seq_sd = torch.LongTensor(input_seq_sd).to(device)
+
     input_seq_batch_f = [input_seq_f]
     input_seq_batch_f = np.array(input_seq_batch_f)
-    input_seq_batch_f = np.transpose(input_seq_batch_f)
     input_seq_batch_f = torch.LongTensor(input_seq_batch_f).to(device)
 
     model_fwd = lstm_model.get_forward_lstm_model(load_from_file=True)
-    output_prb_f = torch.softmax(model_fwd(input_seq_batch_f, input_seq_length), dim=-1)
+    output_prb_f = torch.softmax(model_fwd(input_seq_batch_f, input_seq_length, input_seq_sd), dim=-1)
     output_prb_f = output_prb_f.cpu().detach().numpy()
 
     return output_prb_f
@@ -74,13 +77,16 @@ def get_model_probs_b(input_seq):
     input_seq_length = [len(input_seq)]
     input_seq_length = torch.LongTensor(input_seq_length).to(device)
 
+    input_seq_sd = [input_seq[0], input_seq[-1]]
+    input_seq_sd = torch.LongTensor(input_seq_sd).to(device)
+
     input_seq_batch_b = [input_seq_b]
     input_seq_batch_b = np.array(input_seq_batch_b)
     input_seq_batch_b = np.transpose(input_seq_batch_b)
     input_seq_batch_b = torch.LongTensor(input_seq_batch_b).to(device)
 
     model_bwd = lstm_model.get_backward_lstm_model(load_from_file=True)
-    output_prb_b = torch.softmax(model_bwd(input_seq_batch_b, input_seq_length), dim=-1)
+    output_prb_b = torch.softmax(model_bwd(input_seq_batch_b, input_seq_length, input_seq_sd), dim=-1)
     output_prb_b = output_prb_b.cpu().detach().numpy()
 
     return output_prb_b
@@ -126,15 +132,18 @@ def get_backward_sequence(middle_poi, start_poi, end_poi, max_length):
     while len(input_seq) < max_length:
         input_seq_batch = [input_seq]
         input_seq_batch_len = [len(input_seq)]
+        input_seq_batch_sd = [input_seq[0], input_seq[-1]]
 
-        input_seq_batch_n = np.transpose(np.array(input_seq_batch).astype(int))
+        input_seq_batch_n = np.array(input_seq_batch).astype(int)
         input_seq_batch_len_n = np.array(input_seq_batch_len).astype(int)
+        input_seq_batch_sd_n = np.array(input_seq_batch_sd).astype(int)
 
         input_seq_batch_t = torch.LongTensor(input_seq_batch_n).to(device)
         input_seq_batch_len_t = torch.LongTensor(input_seq_batch_len_n).to(device)
+        input_seq_batch_sd_t = torch.LongTensor(input_seq_batch_sd_n).to(device)
 
         model_bwd = lstm_model.get_backward_lstm_model(load_from_file=True)
-        output_prb = torch.softmax(model_bwd(input_seq_batch_t, input_seq_batch_len_t), dim=-1)
+        output_prb = torch.softmax(model_bwd(input_seq_batch_t, input_seq_batch_len_t, input_seq_batch_sd_t), dim=-1)
         output_prb = output_prb.cpu().detach().numpy()
 
         if len(input_seq) == 1:
@@ -175,17 +184,21 @@ def get_forward_sequence(middle_poi, start_poi, end_poi, max_length):
     end_poi_probs = [0.0]
 
     while len(input_seq) < max_length:
+
         input_seq_batch = [input_seq]
         input_seq_batch_len = [len(input_seq)]
+        input_seq_batch_sd = [input_seq[0], input_seq[-1]]
 
-        input_seq_batch_n = np.transpose(np.array(input_seq_batch).astype(int))
+        input_seq_batch_n = np.array(input_seq_batch).astype(int)
         input_seq_batch_len_n = np.array(input_seq_batch_len).astype(int)
+        input_seq_batch_sd_n = np.array(input_seq_batch_sd).astype(int)
 
         input_seq_batch_t = torch.LongTensor(input_seq_batch_n).to(device)
         input_seq_batch_len_t = torch.LongTensor(input_seq_batch_len_n).to(device)
+        input_seq_batch_sd_t = torch.LongTensor(input_seq_batch_sd_n).to(device)
 
         model_fwd = lstm_model.get_forward_lstm_model(load_from_file=True)
-        output_prb = torch.softmax(model_fwd(input_seq_batch_t, input_seq_batch_len_t), dim=-1)
+        output_prb = torch.softmax(model_fwd(input_seq_batch_t, input_seq_batch_len_t, input_seq_batch_sd_t), dim=-1)
         output_prb = output_prb.cpu().detach().numpy()
 
         if len(input_seq) == 1:
@@ -232,15 +245,18 @@ def get_fixed_length_sequence(start_poi, middle_poi, end_poi, seq_length):
     while len(input_seq) != seq_length:
         input_seq_batch = [input_seq]
         input_seq_batch_len = [len(input_seq)]
+        input_seq_batch_sd = [input_seq[0], input_seq[-1]]
 
-        input_seq_batch_n = np.transpose(np.array(input_seq_batch).astype(int))
+        input_seq_batch_n = np.array(input_seq_batch).astype(int)
         input_seq_batch_len_n = np.array(input_seq_batch_len).astype(int)
+        input_seq_batch_sd_n = np.array(input_seq_batch_sd).astype(int)
 
         input_seq_batch_t = torch.LongTensor(input_seq_batch_n).to(device)
         input_seq_batch_len_t = torch.LongTensor(input_seq_batch_len_n).to(device)
+        input_seq_batch_sd_t = torch.LongTensor(input_seq_batch_sd_n).to(device)
 
         model_fwd = lstm_model.get_forward_lstm_model(load_from_file=True)
-        output_prb = torch.softmax(model_fwd(input_seq_batch_t, input_seq_batch_len_t), dim=-1)
+        output_prb = torch.softmax(model_fwd(input_seq_batch_t, input_seq_batch_len_t, input_seq_batch_sd_t), dim=-1)
         output_prb = output_prb.cpu().detach().numpy()
 
         if len(input_seq) == seq_length - 1:
@@ -266,15 +282,18 @@ def get_fixed_length_sequence(start_poi, middle_poi, end_poi, seq_length):
     while len(input_seq) != seq_length:
         input_seq_batch = [input_seq]
         input_seq_batch_len = [len(input_seq)]
+        input_seq_batch_sd = [input_seq[0], input_seq[-1]]
 
-        input_seq_batch_n = np.transpose(np.array(input_seq_batch).astype(int))
+        input_seq_batch_n = np.array(input_seq_batch).astype(int)
         input_seq_batch_len_n = np.array(input_seq_batch_len).astype(int)
+        input_seq_batch_sd_n = np.array(input_seq_batch_sd).astype(int)
 
         input_seq_batch_t = torch.LongTensor(input_seq_batch_n).to(device)
         input_seq_batch_len_t = torch.LongTensor(input_seq_batch_len_n).to(device)
+        input_seq_batch_sd_t = torch.LongTensor(input_seq_batch_sd_n).to(device)
 
         model_bwd = lstm_model.get_backward_lstm_model(load_from_file=True)
-        output_prb = torch.softmax(model_bwd(input_seq_batch_t, input_seq_batch_len_t), dim=-1)
+        output_prb = torch.softmax(model_bwd(input_seq_batch_t, input_seq_batch_len_t, input_seq_batch_sd_t), dim=-1)
         output_prb = output_prb.cpu().detach().numpy()
 
         if len(input_seq) == seq_length - 1:
