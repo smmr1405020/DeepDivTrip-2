@@ -120,7 +120,7 @@ def generate_result(load_from_file, K, N_min, N_max):
     print("Likability: " + str(avg_likability) + " F1: " + str(avg_f1) + " PF1: " + str(avg_pf1)
           + " Div: " + str(avg_div))
 
-    write_to_file(all_recset, 'recset_ddtwos', N_min=N_min, N_max=N_max)
+    write_to_file(all_recset, 'recset_ddtwog', N_min=N_min, N_max=N_max)
 
     return
 

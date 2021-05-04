@@ -9,14 +9,14 @@ else:
     for f in files:
         os.remove(f)
 
-if not os.path.exists('recset_ddtwos'):
-    os.mkdir('recset_ddtwos')
+if not os.path.exists('recset_ddtwog'):
+    os.mkdir('recset_ddtwog')
 else:
-    files = glob.glob('recset_ddtwos/*')
+    files = glob.glob('recset_ddtwog/*')
     for f in files:
         os.remove(f)
 
-args_kdiverse.dat_ix = 8
+args_kdiverse.dat_ix = 2
 args_kdiverse.FOLD = 5
 args_kdiverse.test_index = 1
 args_kdiverse.copy_no = 0
