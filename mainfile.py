@@ -2,19 +2,19 @@ import args_kdiverse
 import os
 import glob
 
-# if os.path.exists('model_files'):
-#     files = glob.glob('model_files/*')
-#     for f in files:
-#         os.remove(f)
-# else:
-#     os.mkdir('model_files')
-#
-# if os.path.exists('recset_myalgo'):
-#     files = glob.glob('recset_myalgo/*')
-#     for f in files:
-#         os.remove(f)
-# else:
-#     os.mkdir('recset_myalgo')
+if not os.path.exists('model_files'):
+    os.mkdir('model_files')
+else:
+    files = glob.glob('model_files/*')
+    for f in files:
+        os.remove(f)
+
+if not os.path.exists('recset_myalgo'):
+    os.mkdir('recset_myalgo')
+else:
+    files = glob.glob('recset_myalgo/*')
+    for f in files:
+        os.remove(f)
 
 args_kdiverse.dat_ix = 2
 args_kdiverse.FOLD = 5
