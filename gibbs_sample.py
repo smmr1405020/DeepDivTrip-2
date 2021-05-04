@@ -169,7 +169,6 @@ def get_refined_traj(input_seq, prominent_poi_pos):
     output_prob_f, output_prob_b = get_model_probs(input_seq)
 
     prominent_poi_probs = [0.0]
-    substitute_poi = -1
     for i in range(1, N - 1):
         if i <= N / 2:
             final_prob = output_prob_f[i - 1]
@@ -187,11 +186,12 @@ def get_refined_traj(input_seq, prominent_poi_pos):
     prominent_poi_idx = np.argmax(prominent_poi_probs)
     input_seq[prominent_poi_idx] = prominent_poi
     if int(prominent_poi_idx) != prominent_poi_pos:
-        input_seq[prominent_poi_pos] = substitute_poi
         if prominent_poi_pos <= N / 2:
             final_prob = output_prob_f[prominent_poi_pos - 1]
         else:
             final_prob = output_prob_b[N - prominent_poi_pos - 1]
+
+        final_prob += 1e-6
         for input_seq_idx in range(len(input_seq)):
             final_prob[input_seq[input_seq_idx]] = 0
         sampled_idx = sample_from_candidate(final_prob)
