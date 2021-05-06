@@ -166,16 +166,12 @@ def choose_action(c):
 def get_refined_traj(input_seq, prominent_poi_pos):
     prominent_poi = input_seq[prominent_poi_pos]
     N = len(input_seq)
-    output_prob_f, output_prob_b = get_model_probs(input_seq)
 
     prominent_poi_probs = [0.0]
     for i in range(1, N - 1):
-        if i <= N / 2:
-            final_prob = output_prob_f[i - 1]
-            prominent_poi_probs.append(final_prob[prominent_poi])
-        else:
-            final_prob = output_prob_b[N - i - 2]
-            prominent_poi_probs.append(final_prob[prominent_poi])
+        final_prob, _ = get_prob_in_idx(input_seq, i)
+        final_prob += 1e-6
+        prominent_poi_probs.append(final_prob[prominent_poi])
         for input_seq_idx in range(len(input_seq)):
             final_prob[input_seq[input_seq_idx]] = 0
 
@@ -186,11 +182,7 @@ def get_refined_traj(input_seq, prominent_poi_pos):
     prominent_poi_idx = np.argmax(prominent_poi_probs)
     input_seq[prominent_poi_idx] = prominent_poi
     if int(prominent_poi_idx) != prominent_poi_pos:
-        if prominent_poi_pos <= N / 2:
-            final_prob = output_prob_f[prominent_poi_pos - 1]
-        else:
-            final_prob = output_prob_b[N - prominent_poi_pos - 1]
-
+        final_prob, _ = get_prob_in_idx(input_seq, prominent_poi_pos)
         final_prob += 1e-6
         for input_seq_idx in range(len(input_seq)):
             final_prob[input_seq[input_seq_idx]] = 0

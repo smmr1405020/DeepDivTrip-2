@@ -106,6 +106,8 @@ def generate_result(load_from_file, K, N_min, N_max):
         print("\n")
 
     end = time.time()
+    print(N_max)
+    print(count)
     print("Time: {}".format((end - st) / count))
     print("\n")
     print("Final Score - With K = {}".format(K))
