@@ -11,7 +11,7 @@ if os.path.exists('model_files'):
 if not os.path.exists('recset_myalgo'):
     os.mkdir('recset_myalgo')
 
-args_kdiverse.dat_ix = 2
+args_kdiverse.dat_ix = 4
 args_kdiverse.FOLD = 5
 args_kdiverse.test_index = 5
 args_kdiverse.copy_no = 0
