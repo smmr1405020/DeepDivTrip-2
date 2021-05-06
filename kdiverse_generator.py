@@ -41,9 +41,9 @@ def generate_result(load_from_file, K, N_min, N_max):
         poi_start = int(str_k[0])
         poi_end = int(str_k[1])
 
-        print("{}/{}".format(count, len(data_generator.query_dict_trajectory_test)))
+        #print("{}/{}".format(count, len(data_generator.query_dict_trajectory_test)))
         count += 1
-        print([data_generator.int_to_vocab[poi_start], data_generator.int_to_vocab[poi_end]])
+        #print([data_generator.int_to_vocab[poi_start], data_generator.int_to_vocab[poi_end]])
 
         _, lstm_order = trajectory_generator.get_prob_in_idx([poi_start, 0, poi_end], 1)
         lstm_rank = np.argsort(lstm_order)
@@ -86,41 +86,42 @@ def generate_result(load_from_file, K, N_min, N_max):
         dict_temp = dict()
         dict_temp[k] = all_traj
         all_recset[k_converted] = list(data_generator.convert_int_to_vocab(dict_temp).values())[0]
-        print(metric.tot_f1_evaluation(v, data_generator.query_dict_freq_test[k], all_traj))
-
-        print(all_gtset[k_converted])
-        print(all_recset[k_converted])
-
-        total_score_likability += metric.likability_score_3(v, data_generator.query_dict_freq_test[k], all_traj)
-        total_score_curr_f1 += metric.tot_f1_evaluation(v, data_generator.query_dict_freq_test[k], all_traj)
-        total_score_curr_pf1 += metric.tot_pf1_evaluation(v, data_generator.query_dict_freq_test[k], all_traj)
-        total_score_intra_div_f1 += metric.intra_div_F1(all_traj)
-
-        total_traj_curr += np.sum(data_generator.query_dict_freq_test[k]) * len(all_traj)
-
-        avg_likability = total_score_likability / (count - 1)
-        avg_div = total_score_intra_div_f1 / (count - 1)
-        avg_f1 = total_score_curr_f1 / total_traj_curr
-        avg_pf1 = total_score_curr_pf1 / total_traj_curr
-
-        print("Avg. upto now: Likability: " + str(avg_likability) + " F1: " + str(avg_f1) + " PF1: " + str(avg_pf1)
-              + " Div: " + str(avg_div))
+        # print(metric.tot_f1_evaluation(v, data_generator.query_dict_freq_test[k], all_traj))
+        #
+        # print(all_gtset[k_converted])
+        # print(all_recset[k_converted])
+        #
+        # total_score_likability += metric.likability_score_3(v, data_generator.query_dict_freq_test[k], all_traj)
+        # total_score_curr_f1 += metric.tot_f1_evaluation(v, data_generator.query_dict_freq_test[k], all_traj)
+        # total_score_curr_pf1 += metric.tot_pf1_evaluation(v, data_generator.query_dict_freq_test[k], all_traj)
+        # total_score_intra_div_f1 += metric.intra_div_F1(all_traj)
+        #
+        # total_traj_curr += np.sum(data_generator.query_dict_freq_test[k]) * len(all_traj)
+        #
+        # avg_likability = total_score_likability / (count - 1)
+        # avg_div = total_score_intra_div_f1 / (count - 1)
+        # avg_f1 = total_score_curr_f1 / total_traj_curr
+        # avg_pf1 = total_score_curr_pf1 / total_traj_curr
+        #
+        # print("Avg. upto now: Likability: " + str(avg_likability) + " F1: " + str(avg_f1) + " PF1: " + str(avg_pf1)
+        #       + " Div: " + str(avg_div))
 
     end = time.time()
+    print(N_max)
+    print(count)
     print("Total Time Per Query: {}".format((end - start) / count))
-
     print("\n\n")
-    print("Final Score - With K = {}".format(K))
-
-    avg_likability = total_score_likability / (count - 1)
-    avg_div = total_score_intra_div_f1 / (count - 1)
-    avg_f1 = total_score_curr_f1 / total_traj_curr
-    avg_pf1 = total_score_curr_pf1 / total_traj_curr
-
-    print("Likability: " + str(avg_likability) + " F1: " + str(avg_f1) + " PF1: " + str(avg_pf1)
-          + " Div: " + str(avg_div))
-
-    write_to_file(all_recset, 'recset_ddtwog', N_min=N_min, N_max=N_max)
+    # print("Final Score - With K = {}".format(K))
+    #
+    # avg_likability = total_score_likability / (count - 1)
+    # avg_div = total_score_intra_div_f1 / (count - 1)
+    # avg_f1 = total_score_curr_f1 / total_traj_curr
+    # avg_pf1 = total_score_curr_pf1 / total_traj_curr
+    #
+    # print("Likability: " + str(avg_likability) + " F1: " + str(avg_f1) + " PF1: " + str(avg_pf1)
+    #       + " Div: " + str(avg_div))
+    #
+    # write_to_file(all_recset, 'recset_ddtwog', N_min=N_min, N_max=N_max)
 
     return
 
