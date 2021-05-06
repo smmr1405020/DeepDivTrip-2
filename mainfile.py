@@ -10,11 +10,17 @@ if os.path.exists('model_files'):
 
 if not os.path.exists('recset_myalgo'):
     os.mkdir('recset_myalgo')
+else:
+    files = glob.glob('recset_myalgo/*')
+    for f in files:
+        os.remove(f)
 
-args_kdiverse.dat_ix = 4
+args_kdiverse.dat_ix = 2
 args_kdiverse.FOLD = 5
-args_kdiverse.test_index = 5
+args_kdiverse.test_index = 1
 args_kdiverse.copy_no = 0
+
+K = 3
 
 model_zip_name = 'model_files_ds_' + str(args_kdiverse.dat_ix) + '_index_' \
                  + str(args_kdiverse.test_index) + '.zip'
@@ -28,7 +34,7 @@ generate_ds(args_kdiverse.dat_ix, args_kdiverse.FOLD, args_kdiverse.test_index, 
 
 from kdiverse_generator import generate_result
 
-Ns = [(3, 3), (5, 5), (7, 7), (9, 9)]
+Ns = [(5, 5)]
 
 for Nmn, Nmx in Ns:
-    generate_result(True, K=3, N_min=Nmn, N_max=Nmx)
+    generate_result(True, K=K, N_min=Nmn, N_max=Nmx)
