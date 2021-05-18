@@ -219,6 +219,8 @@ def get_refined_traj_2(input_seq, non_replacable_poi_pos):
         return input_seq_
 
     def swap_poi(input_seq_, idx, non_replacable_poi_pos_):
+        if idx >= N - 2:
+            return input_seq_, non_replacable_poi_pos_
         # idx_poi_prob = [0.0]
         # output_prb_f = get_model_probs_f(input_seq)
         # output_prb_b = get_model_probs_b(input_seq)
