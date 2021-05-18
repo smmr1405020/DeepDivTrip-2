@@ -15,9 +15,9 @@ else:
     for f in files:
         os.remove(f)
 
-args_kdiverse.dat_ix = 2
+args_kdiverse.dat_ix = 7
 args_kdiverse.FOLD = 5
-args_kdiverse.test_index = 1
+args_kdiverse.test_index = 3
 args_kdiverse.copy_no = 0
 
 K = 3
@@ -34,7 +34,7 @@ generate_ds(args_kdiverse.dat_ix, args_kdiverse.FOLD, args_kdiverse.test_index, 
 
 from kdiverse_generator import generate_result
 
-Ns = [(5, 5)]
+Ns = [(3, 3), (5, 5), (7, 7), (9, 9)]
 
 for Nmn, Nmx in Ns:
     generate_result(True, K=K, N_min=Nmn, N_max=Nmx)

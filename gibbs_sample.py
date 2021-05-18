@@ -192,26 +192,130 @@ def get_refined_traj(input_seq, prominent_poi_pos):
     return input_seq, prominent_poi_idx
 
 
-def sampling_algo_2(barebone_seq, N_max=5, N_min=5):
+def get_refined_traj_2(input_seq, non_replacable_poi_pos):
+    N = len(input_seq)
+
+    new_input_seq = None
+    new_non_replacable_poi_pos = None
+
+    forbidden_poi_list = []
+    for i in range(len(non_replacable_poi_pos)):
+        if non_replacable_poi_pos[i] == 1:
+            forbidden_poi_list.append(input_seq[i])
+
+    def replace_poi(input_seq_, idx, forbidden_pois):
+        final_prob, _ = get_prob_in_idx(input_seq_, idx)
+        final_prob += 1e-6
+
+        for poi in input_seq_:
+            if poi != input_seq_[idx]:
+                final_prob[poi] = 0
+
+        for forbidden_poi in forbidden_pois:
+            final_prob[forbidden_poi] = 0
+
+        sampled_idx = sample_from_candidate(final_prob)
+        input_seq_[idx] = sampled_idx
+        return input_seq_
+
+    def swap_poi(input_seq_, idx, non_replacable_poi_pos_):
+        # idx_poi_prob = [0.0]
+        # output_prb_f = get_model_probs_f(input_seq)
+        # output_prb_b = get_model_probs_b(input_seq)
+        #
+        # l1 = list(output_prb_f[: -2, idx])
+        # l2 = list(reversed(list(output_prb_b[: -2, idx])))
+        # l_ = np.maximum(l1, l2)
+        #
+        # idx_poi_prob = idx_poi_prob + list(l_) + [0.0]
+        # idx_poi_prob[idx] = 0
+        another_random_poi_idx = idx
+        while another_random_poi_idx == idx:
+            another_random_poi_idx = np.random.randint(1, N - 2)
+
+        temp = input_seq_[idx]
+        input_seq_[idx] = input_seq_[another_random_poi_idx]
+        input_seq_[another_random_poi_idx] = temp
+
+        temp = non_replacable_poi_pos_[idx]
+        non_replacable_poi_pos_[idx] = non_replacable_poi_pos_[another_random_poi_idx]
+        non_replacable_poi_pos_[another_random_poi_idx] = temp
+
+        return input_seq_, non_replacable_poi_pos_
+
+    i = np.random.randint(1, N - 1)
+    r = np.random.random()
+    if non_replacable_poi_pos[i] == 0:
+
+        if r < (1 / 2) or i >= N - 2:
+            input_seq = replace_poi(input_seq, i, forbidden_poi_list)
+        else:
+            input_seq, non_replacable_poi_pos = swap_poi(input_seq, i, non_replacable_poi_pos)
+    elif non_replacable_poi_pos[i] == 1:
+        if r < (1 / 2):
+            input_seq, non_replacable_poi_pos = swap_poi(input_seq, i, non_replacable_poi_pos)
+            if non_replacable_poi_pos[i] == 0:
+                input_seq = replace_poi(input_seq, i, forbidden_poi_list)
+
+    return input_seq, non_replacable_poi_pos
+
+
+def sampling_algo_2(barebone_seq, N_max=5):
     N = N_max
 
     dummy_candidate_seq = np.arange(N)
+    dummy_non_replacable_poi_pos = np.zeros(dummy_candidate_seq.shape)
+
+    counter = N
+    for i in range(1, len(dummy_candidate_seq)):
+        if dummy_candidate_seq[i] in barebone_seq:
+            dummy_candidate_seq[i] = counter
+            counter += 1
+
     dummy_candidate_seq[0] = barebone_seq[0]
     dummy_candidate_seq[-1] = barebone_seq[-1]
+
+    dummy_non_replacable_poi_pos[0] = 1
+    dummy_non_replacable_poi_pos[-1] = 1
+
     best_perp = 1000
-    best_traj = barebone_seq
+    best_traj = dummy_candidate_seq
+    best_non_replacable_poi_pos = dummy_non_replacable_poi_pos
 
     prominent_poi_idx = np.random.randint(1, N - 1)
     dummy_candidate_seq[prominent_poi_idx] = barebone_seq[1]
 
+    dummy_non_replacable_poi_pos[prominent_poi_idx] = 1
+
     curr_candidate_seq = dummy_candidate_seq
-    curr_prominent_poi_idx = prominent_poi_idx
-    for j in range(6):
-        curr_candidate_seq, curr_prominent_poi_idx = get_refined_traj(curr_candidate_seq, curr_prominent_poi_idx)
-        curr_candidate_seq_perp = get_traj_perplexity(curr_candidate_seq)
+    curr_non_replacable_poi_pos = dummy_non_replacable_poi_pos
+    curr_candidate_seq_perp = 1000
+    unchanged = 2
 
-        if best_perp == 1000 or best_perp > curr_candidate_seq_perp:
-            best_perp = curr_candidate_seq_perp
-            best_traj = curr_candidate_seq
+    # print(barebone_seq)
+    # print(curr_candidate_seq)
+    # print(curr_non_replacable_poi_pos)
+    # print("\n")
+    isFirst = True
+    for j in range(5*(N-2)):
+        curr_candidate_seq_cand, curr_non_replacable_poi_pos_cand = get_refined_traj_2(curr_candidate_seq.copy(),
+                                                                                       curr_non_replacable_poi_pos.copy())
 
+        curr_candidate_seq_cand_perp = get_traj_perplexity(curr_candidate_seq)
+        if curr_candidate_seq_cand_perp < curr_candidate_seq_perp or unchanged >= 2:
+            curr_candidate_seq = curr_candidate_seq_cand
+            curr_non_replacable_poi_pos = curr_non_replacable_poi_pos_cand
+            curr_candidate_seq_perp = curr_candidate_seq_cand_perp
+            unchanged = 0
+        else:
+            unchanged += 1
+
+        # print(curr_candidate_seq)
+        # print(curr_non_replacable_poi_pos)
+        # print(curr_candidate_seq_perp)
+        if best_perp == 1000 or best_perp > curr_candidate_seq_cand_perp:
+            best_perp = curr_candidate_seq_cand_perp
+            best_traj = curr_candidate_seq_cand
+
+    # print("\n\n")
     return best_traj

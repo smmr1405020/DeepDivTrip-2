@@ -34,6 +34,9 @@ def generate_result(load_from_file, K, N_min, N_max):
     st = time.time()
     for k, v in data_generator.query_dict_trajectory_test.items():
 
+        # if count>= 3:
+        #     break
+
         str_k = str(k).split("-")
         poi_start = int(str_k[0])
         poi_end = int(str_k[1])
@@ -63,7 +66,7 @@ def generate_result(load_from_file, K, N_min, N_max):
         for i in range(K):
             use_freq, next_poi = get_next_poi(use_freq, lstm_rank)
             new_traj = gibbs_sample.sampling_algo_2([poi_start, next_poi, poi_end],
-                                                  N_max=N_max, N_min=N_min)
+                                                    N_max=N_max)
             for j in range(len(new_traj)):
                 use_freq[new_traj[j]] += 1
             all_traj.append(new_traj)
